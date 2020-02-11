@@ -26,6 +26,28 @@ import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'Adafruit_feed.dart';
 
+
+// config/private.json asset is used for settings config/private.json should be a file in .gitignore.
+// the intent is to hide this private info in a file that is not sync'd
+// with gitHub.
+//
+
+void subscribeAtBoot() async {
+    print("Boot");
+    String connect = await rootBundle.loadString('config/private.json');
+    var cnt = json.decode(connect);
+    var topic = cnt['topic'];
+    print("Subscribe to " + topic);
+    await AppMqttTransactions()._connectToClient();
+    await AppMqttTransactions().subscribe(topic);
+  }
+
+Future<Map> getMqttSettings() async {
+  // TODO: Check if private.json does not exist or expected key/values are not there.
+  String connect = await rootBundle.loadString('config/private.json');
+  return (json.decode(connect));
+}
+
 class AppMqttTransactions {
   Logger log;
 // Constructor
@@ -41,15 +63,13 @@ class AppMqttTransactions {
   // in some situations, this will make sense.  For now I limit to one subscription at a time.
   String previousTopic;
   bool bAlreadySubscribed = false;
+
+
+
 //////////////////////////////////////////
-// Subscribe to an (Adafruit) mqtt topic.
+// Subscribe to an  mqtt topic.
   Future<bool> subscribe(String topic) async {
-    // With await, we are assured of getting a string back and not a
-    // Future<String> placeholder instance.
-    // The rest of the code in the Main UI thread can continue.
-    // I liked the explanation in the "Dart & Flutter Asnchronous Tutorial.."
-    // https://bit.ly/2Dq12PJ
-    //
+    print ("subscribe(String topic)");
     if (await _connectToClient() == true) {
       /// Add the unsolicited disconnection callback
       client.onDisconnected = _onDisconnected;
@@ -63,13 +83,14 @@ class AppMqttTransactions {
       /// can fail either because you have tried to subscribe to an invalid topic or the broker
       /// rejects the subscribe request.
       client.onSubscribed = _onSubscribed;
+
       _subscribe(topic);
     }
     return true;
   }
 
 //
-// Connect to Adafruit io
+// Connect to broker
 //
   Future<bool> _connectToClient() async {
     if (client != null &&
@@ -105,35 +126,17 @@ class AppMqttTransactions {
     log.info('OnConnected client callback - Client connection was sucessful');
   }
 
-  //static Stream<List<Watts>> wattsStream() {}
-  //
-  // uses the config/private.json asset to get the Adafruit broker and our
-  // Adafruit IO key.  config/private.json should be a file in .gitignore.
-  // the intent is to hide this private info in a file that is not sync'd
-  // with gitHub.
-  //
-  Future<Map> _getBrokerAndKey() async {
-    // TODO: Check if private.json does not exist or expected key/values are not there.
-    String connect = await rootBundle.loadString('config/private.json');
-    return (json.decode(connect));
-  }
 
-  //
-  // login to Adafruit
-  //
+  // Login to broker
   Future<MqttClient> _login() async {
-    // With await, we are assured of getting a string back and not a
-    // Future<String> placeholder instance.
-    // The rest of the code in the Main UI thread can continue.  When
-    // the function completes, it will go ahead.
-    // I liked the explanation in the "Dart & Flutter Asnchronous Tutorial.."
-    // https://bit.ly/2Dq12PJ
-
-    Map connectJson = await _getBrokerAndKey();
+    Map connectJson = await getMqttSettings();
     // TBD Test valid broker and key
-    log.info('in _login....broker  : ${connectJson['broker']}');
-    log.info('in _login....key     : ${connectJson['key']}');
-    log.info('in _login....username: ${connectJson['username']}');
+    log.info("Loaded settings:");
+    log.info('Broker  : ${connectJson['broker']}');
+    log.info('Key     : ${connectJson['key']}');
+    log.info('Username: ${connectJson['username']}');
+    log.info('Topic   : ${connectJson['topic']}');
+
 
     client = MqttClient(connectJson['broker'], connectJson['key']);
     // Turn on mqtt package's logging while in test.
@@ -175,14 +178,18 @@ class AppMqttTransactions {
     return client;
   }
 
-//
-// Subscribe to the readings being published into Adafruit's mqtt by the energy monitor(s).
-//
+
   Future _subscribe(String topic) async {
     // for now hardcoding the topic
     if (this.bAlreadySubscribed == true) {
       client.unsubscribe(this.previousTopic);
     }
+
+    Map connectJson = await getMqttSettings();
+    // TBD Test valid broker and key
+    topic = connectJson['topic'];
+    log.info('in subscribe....topic  : ${connectJson['topic']}');
+
     log.info('Subscribing to the topic $topic');
     client.subscribe(topic, MqttQos.atMostOnce);
 

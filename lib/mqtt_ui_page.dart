@@ -16,13 +16,35 @@ class MqttPageState extends State<MqttPage> {
   AppMqttTransactions myMqtt = AppMqttTransactions();
   final myTopicController = TextEditingController();
   final myValueController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: _body(),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                child: Text("Header"),
+              ),
+              ListTile(
+                title: Text("Home"),
+              ),
+              TextField(
+                  controller: myTopicController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter topic to subscribe to',
+                  ),
+                ),
+
+            ],
+          ),
+        ),
+        body: _body(),
     );
   }
 
@@ -34,7 +56,8 @@ class MqttPageState extends State<MqttPage> {
       children: <Widget>[
         _subscriptionInfo(),
         _subscriptionData(),
-        _publishInfo(),
+       // _publishInfo(),
+
       ],
     );
   }
@@ -48,7 +71,7 @@ class MqttPageState extends State<MqttPage> {
       child: Column(
         children: <Widget>[
           Row(
-            children: <Widget>[
+        /*    children: <Widget>[
               Text(
                 'Topic:',
                 style: TextStyle(fontSize: 24),
@@ -64,7 +87,7 @@ class MqttPageState extends State<MqttPage> {
                   ),
                 ),
               ),
-            ],
+            ],*/
           ),
           RaisedButton(
             color: Colors.blue,
@@ -139,6 +162,8 @@ class MqttPageState extends State<MqttPage> {
     myMqtt.publish(topic, value);
   }
 }
+
+
 
 // void publish(String topic) {
 // AppMqttTransactions mySubscribe = AppMqttTransactions();

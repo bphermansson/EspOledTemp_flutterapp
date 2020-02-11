@@ -18,6 +18,7 @@ class MqttPageState extends State<MqttPage> {
         title: Text(widget.title),
       ),
       body: Center(
+        /*
         child: Container(
           child: RaisedButton(
             child: const Text("Get Time"),
@@ -26,7 +27,7 @@ class MqttPageState extends State<MqttPage> {
               _getTime(context);
             },
           ),
-        ),
+        ),*/
       ),
     );
   }

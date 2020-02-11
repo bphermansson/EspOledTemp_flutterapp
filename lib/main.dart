@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:mqtt_client/mqtt_client.dart';
 import 'mqtt_ui_page.dart';
 import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
+import 'mqtt_stream.dart';
+import 'package:flutter_gauge/flutter_gauge.dart';
 
 //
 // This is added to route the logging info - which includes which file and where in the file
@@ -22,20 +25,28 @@ import 'package:stack_trace/stack_trace.dart';
       }
     });
   }
+  mqttSub(){
+    print("mqttSub");
+    subscribeAtBoot();
+  }
+
 void main() {
   initLogger();
   runApp(MyApp());
+  mqttSub();      // Subscribe at boot
 }
 
 class MyApp extends StatelessWidget {
+
   @override
+
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MqttPage(title: 'Adafruit.io learning'),
+      home: MqttPage(title: 'EspOledTemp'),
     );
   }
 }
