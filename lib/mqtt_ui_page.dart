@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'mqtt_stream.dart';
 import 'Adafruit_feed.dart';
+import 'package:flutter_gauge/flutter_gauge.dart';
 
 class MqttPage extends StatefulWidget {
   MqttPage({this.title});
@@ -16,6 +19,8 @@ class MqttPageState extends State<MqttPage> {
   AppMqttTransactions myMqtt = AppMqttTransactions();
   final myTopicController = TextEditingController();
   final myValueController = TextEditingController();
+
+  // Left panel monitor
 
   @override
   Widget build(BuildContext context) {
@@ -54,11 +59,28 @@ class MqttPageState extends State<MqttPage> {
   Widget _body() {
     return Column(
       children: <Widget>[
+        _temp(),
         _subscriptionInfo(),
         _subscriptionData(),
        // _publishInfo(),
 
       ],
+    );
+  }
+
+  Widget _temp() {
+    String reading;
+    stream: AdafruitFeed.sensorStream;
+    builder: (context, snapshot) {
+      String reading = snapshot.data;
+      return Text(reading); // = snapshot.data;
+    };
+
+    return Container(
+        child:
+          Text(reading.toString())
+        //FlutterGauge(handSize: 30,width: 200,index: 25.0,fontFamily: "Iran",end: 100,number: Number.endAndCenterAndStart,secondsMarker: SecondsMarker.secondsAndMinute,counterStyle: TextStyle(color: Colors.black,fontSize: 25,)),
+
     );
   }
 
@@ -89,6 +111,14 @@ class MqttPageState extends State<MqttPage> {
               ),
             ],*/
           ),
+
+          Row(
+            children: <Widget>[
+              Expanded(child: FlutterGauge(handSize: 30,width: 200,index: 25.0,fontFamily: "Iran",end: 100,number: Number.endAndCenterAndStart,secondsMarker: SecondsMarker.secondsAndMinute,counterStyle: TextStyle(color: Colors.black,fontSize: 25,)),),
+            ],
+          ),
+
+
           RaisedButton(
             color: Colors.blue,
             textColor: Colors.white,
@@ -102,6 +132,7 @@ class MqttPageState extends State<MqttPage> {
     );
   }
 
+  // Define which data to show
   Widget _subscriptionData() {
     return StreamBuilder(
         stream: AdafruitFeed.sensorStream,
@@ -113,6 +144,7 @@ class MqttPageState extends State<MqttPage> {
           if (reading == null) {
             reading = 'no value is available';
           }
+          reading = "Value: " + reading;
           return Text(reading);
         });
   }
