@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:logging/logging.dart';
 
-class AdafruitFeed {
+class MqttFeed {
   //
   // Both the StreamController and Stream are defined as static.  This
   // means they both belong to the class and not to an instance.

@@ -167,7 +167,7 @@ class AppMqttTransactions {
 
     /// Check we are connected
     if (client.connectionStatus.state == MqttConnectionState.connected) {
-      log.info('Adafruit client connected');
+      log.info('Mqtt client connected');
     } else {
       /// Use status here rather than state if you also want the broker return code.
       log.info(
@@ -201,7 +201,7 @@ class AppMqttTransactions {
           MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
 
       /// The payload is a byte buffer, this will be specific to the topic
-      AdafruitFeed.add(pt);
+      MqttFeed.add(pt);
       log.info(
           'Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
       return pt;

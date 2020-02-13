@@ -20,7 +20,7 @@ class MqttPageState extends State<MqttPage> {
   final myTopicController = TextEditingController();
   final myValueController = TextEditingController();
 
-  // Left panel monitor
+  // Left panel
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +62,9 @@ class MqttPageState extends State<MqttPage> {
         _temp(),
         _subscriptionInfo(),
         _subscriptionData(),
-       // _publishInfo(),
+        _senderIP(),
+
+        // _publishInfo(),
 
       ],
     );
@@ -70,7 +72,7 @@ class MqttPageState extends State<MqttPage> {
 
   Widget _temp() {
     String reading;
-    stream: AdafruitFeed.sensorStream;
+    stream: MqttFeed.sensorStream;
     builder: (context, snapshot) {
       String reading = snapshot.data;
       return Text(reading); // = snapshot.data;
@@ -93,13 +95,18 @@ class MqttPageState extends State<MqttPage> {
       child: Column(
         children: <Widget>[
           Row(
-        /*    children: <Widget>[
+            children: <Widget>[
               Text(
                 'Topic:',
                 style: TextStyle(fontSize: 24),
               ),
+              ]
+          ),
+
+
               // To use TextField within a row, it needs to be wrapped in a Flexible
               // widget.  See Stackoverflow: https://bit.ly/2IkzqBk
+             /*
               Flexible(
                 child: TextField(
                   controller: myTopicController,
@@ -109,16 +116,16 @@ class MqttPageState extends State<MqttPage> {
                   ),
                 ),
               ),
-            ],*/
+            ],
           ),
-
+*/
           Row(
             children: <Widget>[
               Expanded(child: FlutterGauge(handSize: 30,width: 200,index: 25.0,fontFamily: "Iran",end: 100,number: Number.endAndCenterAndStart,secondsMarker: SecondsMarker.secondsAndMinute,counterStyle: TextStyle(color: Colors.black,fontSize: 25,)),),
             ],
           ),
 
-
+/*
           RaisedButton(
             color: Colors.blue,
             textColor: Colors.white,
@@ -127,15 +134,15 @@ class MqttPageState extends State<MqttPage> {
               subscribe(myTopicController.text);
             },
           ),
-        ],
-      ),
+*/
+]      ),
     );
   }
 
   // Define which data to show
   Widget _subscriptionData() {
     return StreamBuilder(
-        stream: AdafruitFeed.sensorStream,
+        stream: MqttFeed.sensorStream,
         builder: (context, snapshot) {
           // if (!snapshot.hasData) {
           //   return CircularProgressIndicator();
@@ -144,11 +151,30 @@ class MqttPageState extends State<MqttPage> {
           if (reading == null) {
             reading = 'no value is available';
           }
+
           reading = "Value: " + reading;
           return Text(reading);
         });
   }
+  Widget _senderIP(){
+    return StreamBuilder(
+        stream: MqttFeed.sensorStream,
 
+        builder: (context, snapshot) {
+          String reading = snapshot.data;
+
+          String text='';
+          if (reading == null) {
+            reading = '---';
+          }
+          if (reading=="IP")
+            {
+
+            }
+          reading = "Value: " + reading;
+          return Text(reading);
+        });
+  }
   Widget _publishInfo() {
     return Container(
       margin: EdgeInsets.fromLTRB(20.0, 50.0, 20.0, 20.0),
