@@ -179,6 +179,7 @@ class AppMqttTransactions {
   }
 
 
+
   Future _subscribe(String topic) async {
     // for now hardcoding the topic
     if (this.bAlreadySubscribed == true) {
@@ -188,7 +189,7 @@ class AppMqttTransactions {
     Map connectJson = await getMqttSettings();
     // TBD Test valid broker and key
     topic = connectJson['topic'];
-    log.info('in subscribe....topic  : ${connectJson['topic']}');
+    //log.info('in subscribe....topic  : ${connectJson['topic']}');
 
     log.info('Subscribing to the topic $topic');
     client.subscribe(topic, MqttQos.atMostOnce);
@@ -196,15 +197,18 @@ class AppMqttTransactions {
     /// The client has a change notifier object(see the Observable class) which we then listen to to get
     /// notifications of published updates to each subscribed topic.
     client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
+      //
+      var mqtt_Topic = c[0].topic;
       final MqttPublishMessage recMess = c[0].payload;
-      final String pt =
+      /// The payload is a byte buffer, this will be specific to the topic
+      final String mqttMess =
           MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
 
-      /// The payload is a byte buffer, this will be specific to the topic
-      MqttFeed.add(pt);
+      var streamData = [mqtt_Topic,mqttMess];
+      MqttFeed.add(streamData.toString());
       log.info(
-          'Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
-      return pt;
+          'Change notification:: topic is <$mqtt_Topic>, payload is <-- $mqttMess -->');
+      return mqttMess;
     });
   }
 
