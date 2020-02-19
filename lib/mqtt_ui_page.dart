@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'mqtt_stream.dart';
 import 'Adafruit_feed.dart';
 import 'package:flutter_gauge/flutter_gauge.dart';
+import 'package:logging/logging.dart';
+
 
 class MqttPage extends StatefulWidget {
   MqttPage({this.title});
@@ -60,7 +62,7 @@ class MqttPageState extends State<MqttPage> {
       children: <Widget>[
         //_temp(),
         //_subscriptionInfo(),
-        _subscriptionData(),
+        _mqttData(),
         //_senderIP(),
 
         // _publishInfo(),
@@ -121,38 +123,52 @@ class MqttPageState extends State<MqttPage> {
   }
 
   // Define which data to show
-  Widget _subscriptionData() {
-    //return Text("reading");
-
-    //MqttFeed.mqttStream.listen((value) {
-
-
-/*
-      print('Value from controller: $value');
-      if (value.length!=0) {
-        return value;
-      }
-      else {
-        return "0";
-      }
-    });
-*/
+  Widget _mqttData() {
 
       return StreamBuilder(
         stream: MqttFeed.mqttStream,
         builder: (context, snapshot) {
-          // if (!snapshot.hasData) {
-          //   return CircularProgressIndicator();
-          // }
+
+          print('-------------GUI------------');
+
+
+          MqttMess mqttmess = new MqttMess();
+          var _date = "date", _time = "time", _temp = "", _humidity = "", _uptime = "", _uptimeHuman = "", _ip = "";
+
           String reading = snapshot.data;
           if (reading == null) {
             return Text("Waiting");
           }
           var mData = reading.split(",");
           final mMap = mData.asMap(); // Convert to map
-          var topic =  mData[0];
-          var mess =  mData[1];
+          var topic = mData[0];
+          var mess = mData[1];
 
+          print (topic);
+          //if (topic == MqttTopics.date.toString()) {
+            if (topic == "[EspOledTemp/date") {
+            _date = mess;
+            print ("DATE; " + _date);
+          }
+
+          if (topic == MqttTopics.time.toString()) {
+            _time = mess;
+          }
+          if (topic == MqttTopics.temp.toString()) {
+            _temp = mess;
+          }
+          if (topic == MqttTopics.humidity.toString()) {
+            _humidity = mess;
+          }
+          if (topic == MqttTopics.uptime.toString()) {
+            _uptime = mess;
+          }
+          if (topic == MqttTopics.uptimeHuman.toString()) {
+            _uptimeHuman = mess;
+          }
+          if (topic == MqttTopics.ip.toString()) {
+            _ip = mess;
+          }
           if (topic == null) {
             topic = 'No topic yet';
           }
@@ -160,36 +176,74 @@ class MqttPageState extends State<MqttPage> {
             mess = 'No message yet';
           }
 
-          //return Text(reading);
-          log(mess);
+          return Column(
+            children: [
+              Row(
+                children: [
+                  Text(
+                    _date,
+                  ),
+                ]
+              ),
+              Row(
+                  children: [
+                    Text(
+                      _time,
+                    ),
+                  ]
+              ),
+
+
+              Text(
+                'Hey!',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontFamily: 'Futura',
+                  color: Colors.blue,
+                ),
+              ),
+              SizedBox(width: 50),
+
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  border: Border.all(),
+                ),
+              )
+            ]
+          );
+
 
           return Container(
               child:
-                Row(
-                  children:[
+              Row(
+                  children: [
                     Container(
                       child: Text(
                         'Topic: $topic ---',
                         style: TextStyle(fontSize: 12),
-
                       ),
-
                     ),
                     Text(
                       'Message: $mess',
                       style: TextStyle(fontSize: 12),
-
                     ),
+
+                    Row(
+                        children: [
+                          Text(_date)
+                        ]
+                    )
                   ]
-                )
+              )
+
           );
-
-
-
-
-
         });
+
   }
+
   /*
   Widget _senderIP(){
     return StreamBuilder(
@@ -258,11 +312,32 @@ class MqttPageState extends State<MqttPage> {
   }
 }
 
+class MqttMess{
+  String date;
+  String time;
+  String temp;
+  String humidity;
+  String uptime;
+  String uptimeHuman;
+  String ip;
+}
+
+enum MqttTopics{
+  date,
+  time,
+  temp,
+  humidity,
+  uptime,
+  uptimeHuman,
+  ip
+}
+
+/*
 void test(){
 
   int favoriteCount = 1;
 }
-
+*/
 
 // void publish(String topic) {
 // AppMqttTransactions mySubscribe = AppMqttTransactions();
